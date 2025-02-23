@@ -5,9 +5,24 @@ import { router } from "expo-router";
 
 export const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-export const registerControl = async (email: string, password: string, confirmPassword: string) => {
-    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+export const registerControl = async (username: string, email: string, password: string, confirmPassword: string) => {
+    if (!email.trim() && !password.trim() && !confirmPassword.trim()) {
         Alert.alert('Input Error', 'Harap isi semua kolom.');
+        return;
+    } else if (!email.trim() && !password.trim()) {
+        Alert.alert('Input Error', 'Harap isi email dan password.');
+        return;
+    } else if (!password.trim() && !confirmPassword.trim()) {
+        Alert.alert('Input Error', 'Harap isi password dan konfirmasi password.');
+        return;
+    } else if (!confirmPassword.trim()) {
+        Alert.alert('Input Error', 'Harap isi konfirmasi password.');
+        return;
+    } else if (!password.trim() || !confirmPassword.trim()) {
+        Alert.alert('Input Error', 'Harap isi password.');
+        return;
+    } else if (!email.trim() && !password.trim() && !confirmPassword.trim()) { 
+        Alert.alert('Input Error', 'Harap isi email dan konfirmasi password.');
         return;
     }
 
@@ -30,7 +45,7 @@ export const registerControl = async (email: string, password: string, confirmPa
             return;
         }
 
-        await addDoc(collection(db, 'users'), { email, password, role: 'user', timestamp: new Date() });
+        await addDoc(collection(db, 'users'), {username, email, password, role: 'user', timestamp: new Date() });
         Alert.alert('Success', 'Registrasi berhasil! Silakan login.');
         router.push('/(tabs)/Login');
     } catch (error) {

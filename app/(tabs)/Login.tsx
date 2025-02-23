@@ -3,7 +3,7 @@ import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '@/style/signIn_style';
-import { loginControl } from '@/controllers/loginControl';
+import { loginControl } from '@/utils/loginControl';
 
 // const db = getFirestore();
 

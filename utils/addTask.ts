@@ -25,8 +25,14 @@ export const handleTambahTugas = async (
     setSubTugasList: (list: SubTugas[]) => void,
     router: any
 ): Promise<void> => {
-    if (!judulTugas.trim() || subTugasList.length === 0) {
-        Alert.alert('Error', 'Harap isi semua kolom dan tambahkan sub-tugas!');
+    if (!judulTugas.trim() && subTugasList.length === 0) {
+        Alert.alert('Error', 'Harap isi semua kolom');
+        return;
+    } else if (!judulTugas.trim()) {
+        Alert.alert('Error', 'Harap isi judul tugas');
+        return;
+    } else if (subTugasList.length === 0) {
+        Alert.alert('Error', 'Harap isi sub-tugas');
         return;
     }
 
@@ -46,7 +52,7 @@ export const handleTambahTugas = async (
 
         await addDoc(collection(db, 'tdl'), newTugas);
         router.push('/(tabs)/Home');
-        Alert.alert('Sukses', 'Data tugas berhasil ditambahkan!');
+        Alert.alert('Sukses', 'Tugas berhasil ditambahkan!');
 
         setJudulTugas('');
         setSubTugasList([]);

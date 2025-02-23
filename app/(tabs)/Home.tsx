@@ -34,9 +34,10 @@ import styles from '@/style/home_style';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { db } from '@/service/firebaseConfig'
 import TugasComponent from '@/components/Tugas';
-import { handleHapusDeadline, handleSimpanDeadline } from '@/controllers/deadlineCrontrol';
-import { requestNotificationPermission, setupNotificationListener } from '@/controllers/notifikasi';
+import { handleHapusDeadline, handleSimpanDeadline } from '@/utils/deadlineCrontrol';
+import { requestNotificationPermission, setupNotificationListener } from '@/utils/notifikasi';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
 type Tugas = {
@@ -434,6 +435,7 @@ const Home: React.FC = () => {
   //UI/Tampilan
   return (
     <SafeAreaProvider>
+      <StatusBar barStyle={'dark-content'}/>
       <View style={styles.container}>
         <View style={styles.searchContainer}>
           <TouchableOpacity style={styles.buttonSwitch} onPress={handleOpenSwitchAkun}>
@@ -468,11 +470,6 @@ const Home: React.FC = () => {
                       </View>
                     </View>
                     <View style={styles.v6}>
-                    </View>
-                    <View>
-                      <TouchableOpacity onPress={handleCloseSwitchAkun}>
-                        <Ionicons name='arrow-back-outline' size={20} color={''}/>
-                      </TouchableOpacity>
                     </View>
                   </View>
                 </View>
@@ -760,6 +757,8 @@ const Home: React.FC = () => {
               marginBottom: 30,
               marginTop: 35,
               width: '100%',
+              flexDirection: 'row',
+              alignItems: 'flex-end'
             }}>
               <TouchableOpacity style={{
                 marginStart: 15
@@ -767,6 +766,7 @@ const Home: React.FC = () => {
                 onPress={handleCloseEditTugas} >
                 <Ionicons name='arrow-back' size={23} color={'#00000'} />
               </TouchableOpacity>
+              <Text style={{fontSize: 20, marginStart: 30}}>Edit Tugas</Text>
             </View>
             <View>
               <TextInput
@@ -789,25 +789,31 @@ const Home: React.FC = () => {
                 }}
               />
             </View>
-            <View>
-              {selectedEdit?.subTugas && selectedEdit.subTugas.filter(sub => !sub.completed).map((sub, index) => (
-                <View style={{
-                  flexDirection: 'row'
-                }} key={index}>
-                  <Text style={{ width: '100%', padding: 10, marginBottom: 10, marginStart: 15, flex: 1 }}>
-                    {sub.text}
-                  </Text>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <View style={{ flex: 1 }}>
+                <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                  <View style={styles.listSubTugas1}>
+                    {selectedEdit?.subTugas && selectedEdit.subTugas.filter(sub => !sub.completed).map((sub, index) => (
+                      <View style={{
+                        flexDirection: 'row',
+                      }} key={index}>
+                        <Text style={{ width: '100%', padding: 10, marginBottom: 10, marginStart: 15, flex: 1 }}>
+                          {sub.text}
+                        </Text>
 
-                  <TouchableOpacity style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginEnd: 23
-                  }} onPress={() => handleHapusSubTugasSatu(sub.text)}>
-                    <Ionicons name='trash' color={'red'} size={20} />
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
+                        <TouchableOpacity style={{
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          marginEnd: 23
+                        }} onPress={() => handleHapusSubTugasSatu(sub.text)}>
+                          <Ionicons name='trash' color={'red'} size={20} />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                </ScrollView>
+              </View>
+            </GestureHandlerRootView>
             <View style={{
               flexDirection: 'row',
               width: '100%',
@@ -815,7 +821,7 @@ const Home: React.FC = () => {
               justifyContent: 'space-between',
               alignItems: 'center',
               marginStart: 15,
-              marginEnd: 15
+              marginEnd: 15,
             }}>
               <TextInput
                 style={{
@@ -834,7 +840,6 @@ const Home: React.FC = () => {
                 marginEnd: 25
               }} onPress={handleTambahSubTugas}>
 
-                {/* ketika diklik otomatis nambah tanpa harus pakai trigger*/}
                 <Ionicons name='add' color={'#00000'} size={23} />
               </TouchableOpacity>
             </View>
@@ -844,7 +849,7 @@ const Home: React.FC = () => {
               keyExtractor={(_, index) => index.toString()}
               renderItem={({ item, index }) => (
                 <View style={styles.subTugasList}>
-                  <TouchableOpacity
+                  {/* <TouchableOpacity
                     onPress={() => toggleComplete(index)}
                     style={{
                       marginStart: 15
@@ -853,7 +858,7 @@ const Home: React.FC = () => {
                       size={24}
                       color={item.statusSelesai ? 'gray' : 'gray'}
                     />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                   <Text style={[
                     styles.subTeskText,
                     item.statusSelesai && { textDecorationLine: 'line-through' },
@@ -861,14 +866,14 @@ const Home: React.FC = () => {
                     {item.text}
                   </Text>
 
-                  {/* ketika diklik maka akan membatalkan untuk namabah sub-tugas dan hilang */}
                   <TouchableOpacity style={{
                     marginEnd: 10,
                   }} onPress={() => handleHapusSubTugas(index)}>
                     <Ionicons name='close-outline' size={24} color={'black'} />
                   </TouchableOpacity>
                 </View>
-              )} />
+              )}
+            />
           </Modal>
         )}
       </View>

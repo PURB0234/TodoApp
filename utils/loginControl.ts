@@ -7,8 +7,14 @@ import { router } from "expo-router";
 export const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 export const loginControl = async (email: string, password: string) => {
-    if (!email.trim() || !password.trim()) {
+    if (!email.trim() && !password.trim()) {
         Alert.alert('Input Error', 'Harap isi email dan password.');
+        return;
+    } else if (!email.trim()) {
+        Alert.alert('Input Error', 'Harap masukan email.');
+        return;
+    } else if (!password.trim()) {
+        Alert.alert('Input Error', 'Harap masukan password.');
         return;
     }
 

@@ -51,8 +51,8 @@ const styles = StyleSheet.create({
     elevation: 0.1,
     borderWidth: 0.4,
     borderColor: 'gray',
-    maxWidth: '48%',
     margin: 3,
+    maxWidth: '50%',
     flex: 1
   },
   loadingText: {
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     padding: 10
   },
   subTeskText: {
-    marginLeft: 10,
+    marginLeft: 15,
     fontSize: 16,
     flex: 1
   },
@@ -232,6 +232,8 @@ const styles = StyleSheet.create({
     borderRadius: 12.1,
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  listSubTugas1: {
   }
 });
     

@@ -90,7 +90,10 @@ const TugasComponent: React.FC<TugasProps> = ({
             borderBottomRightRadius: 20,
             maxHeight: '100%',
           }}>
+            <View style={{flexDirection: 'row'}}>
             <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>Tugas Prioritas</Text>
+            <Ionicons name='pin-sharp' size={25} color={'red'}/>
+            </View>
             <FlatList
               data={tugas.filter((item) => item.prioritas)}
               numColumns={2}

@@ -31,7 +31,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'skyblue', 
     padding: 10, 
     borderRadius: 5, 
-    alignItems: 'center' 
+    alignItems: 'center', 
+    elevation: 5
   },
   buttonText: { 
     color: '#fff', 

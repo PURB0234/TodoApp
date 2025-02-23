@@ -15,20 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db } from '@/service/firebaseConfig'
 import styles from '@/style/addTask_style';
-import { handleTambahTugas, handleTambahSubTugas } from '@/controllers/addTask';
-
-// const firebaseConfig = {
-//   apiKey: 'AIzaSyBKGfv19cLXQSzCpRCMBdWMjIObZ1E8udA',
-//   authDomain: 'myperpus-551c1.firebaseapp.com',
-//   projectId: 'myperpus-551c1',
-//   storageBucket: 'myperpus-551c1.firebasestorage.app',
-//   messagingSenderId: '908218387114',
-//   appId: '1:908218387114:web:270ae422cdb55f6add9ed3',
-//   measurementId: 'G-PF1489P5YP',
-// };
-
-// const app = initializeApp(firebaseConfig);
-// const db = getFirestore(app);
+import { handleTambahTugas, handleTambahSubTugas } from '@/utils/addTask';
 
 interface SubTugas {
   text: string;
@@ -52,11 +39,14 @@ const Tambah: React.FC = () => {
       <View style={{
         width: '100%',
         marginBottom: 30,
-        marginTop: 35
+        marginTop: 35,
+        flexDirection: 'row',
+        alignItems: 'flex-end'
       }}>
         <TouchableOpacity onPress={() => router.push('/(tabs)/Home')}>
           <Ionicons name='arrow-back' size={23} color={'#00000'} />
         </TouchableOpacity>
+        <Text style={{fontSize: 20, marginStart: 30}}>Tambah Tugas</Text>
       </View>
       <TextInput
         style={styles.input}

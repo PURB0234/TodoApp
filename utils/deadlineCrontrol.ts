@@ -1,7 +1,6 @@
 import { doc, updateDoc, deleteField } from "firebase/firestore";
 import { Alert } from "react-native";
-import { db } from "@/service/firebaseConfig"; 
-// import { scheduleDeadlineNotification } from "./notifikasi";
+import { db } from "@/service/firebaseConfig";
 import * as Notifications from "expo-notifications";
 
 interface Tugas {
@@ -15,18 +14,19 @@ export const handleHapusDeadline = async (
   setSelectedTugas: (tugas: Tugas | null) => void,
   setIsVisible: (visible: boolean) => void
 ) => {
-  if (!selectedTugas?.id) return; 
-  
+  if (!selectedTugas?.id) return;
+
   try {
     const tugasDocRef = doc(db, "tdl", selectedTugas.id);
-    
     await updateDoc(tugasDocRef, {
       deadline: deleteField(),
     });
 
-    setSelectedTugas(null); 
-    setIsVisible(false); 
-    Alert.alert("Sukses", "Deadline berhasil dihapus!");
+    await Notifications.cancelAllScheduledNotificationsAsync();
+
+    setSelectedTugas(null);
+    setIsVisible(false);
+    Alert.alert("Sukses", "Deadline berhasil dihapus dan notifikasi dibatalkan!");
   } catch (error) {
     console.error("Error menghapus deadline:", error);
     Alert.alert("Error", "Gagal menghapus deadline!");
@@ -47,8 +47,11 @@ export const handleSimpanDeadline = async (
     tanggal.getMonth(),
     tanggal.getDate(),
     waktu.getHours(),
-    waktu.getMinutes()
+    waktu.getMinutes(),
+    0
   );
+
+  const notificationTime = new Date(combinedDateTime.getTime() - 2 * 60 * 1000);
 
   try {
     const tugasDocRef = doc(db, "tdl", selectedTugas.id);
@@ -57,21 +60,27 @@ export const handleSimpanDeadline = async (
     setSelectedTugas({ ...selectedTugas, deadline: combinedDateTime.toISOString() });
     setIsVisible(false);
 
-    const timeNow = new Date();
-    const timeDeadline = new Date(combinedDateTime);
-    const secondsUntilDeadline = Math.floor((timeDeadline.getTime() - timeNow.getTime()) / 1000);
+    const now = new Date();
+    const secondsUntilNotification = Math.floor((notificationTime.getTime() - now.getTime()) / 1000);
 
-    if (secondsUntilDeadline > 0) {
-      const trigger: any = { date: timeDeadline};
-      console.log(`⏳ Notifikasi akan muncul dalam ${secondsUntilDeadline} detik`);
-      await Notifications.scheduleNotificationAsync({
+    await Notifications.cancelAllScheduledNotificationsAsync();
+
+    console.log("⏳ Deadline:", combinedDateTime.toLocaleString());
+    console.log("🔔 Notifikasi dijadwalkan pada:", notificationTime.toLocaleString());
+    console.log(`⏳ Notifikasi akan muncul dalam ${secondsUntilNotification} detik`);
+
+    if (notificationTime > now) {
+      const trigger: any = { seconds: secondsUntilNotification}
+      setTimeout(() => {
+      Notifications.scheduleNotificationAsync({
         content: {
-          title: "Pengingat Deadline 📅",
-          body: `Deadline tugas "${selectedTugas.judulTugas}" pada ${combinedDateTime.toLocaleString()}. Jangan Lupa mengerjakan tugasmu, Tetap semangat menjalani hari-hari yang indah ini😊`,
+          title: `${selectedTugas.judulTugas} 📅`,
+          body: `Deadline tugas pada ${combinedDateTime.toLocaleString()}. Kerjain hei tugasnya kamu ini 😡😤`,
           sound: "default",
         },
         trigger: trigger, 
       });
+    }, secondsUntilNotification * 1000)
 
       Alert.alert("Sukses", "Deadline berhasil disimpan & notifikasi dijadwalkan.");
     } else {

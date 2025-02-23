@@ -28,10 +28,11 @@ const styles = StyleSheet.create({
       marginBottom: 10 
     },
     button: { 
-      backgroundColor: 'skyblue', 
+      backgroundColor: 'purple', 
       padding: 10, 
       borderRadius: 5, 
-      alignItems: 'center' 
+      alignItems: 'center',
+      elevation: 5 
     },
     buttonText: { 
       color: '#fff', 

@@ -3,11 +3,12 @@ import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '@/style/signUp_style';
-import { registerControl } from '@/controllers/registerControl';
+import { registerControl } from '@/utils/registerControl';
 
 // const db = getFirestore();
 
 const Register: React.FC = () => {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -55,6 +56,10 @@ const Register: React.FC = () => {
       <View style={styles.card}>
         <Text style={styles.title}>Register</Text>
         <View style={styles.vInput}>
+          <TextInput style={{ flex: 1 }} placeholder="Username" value={username} onChangeText={setUsername} keyboardType="default" autoCapitalize="none" />
+          <Ionicons name="key" size={17} color="black" style={{ padding: 10 }} />
+        </View>
+        <View style={styles.vInput}>
           <TextInput style={{ flex: 1 }} placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
           <Ionicons name="person" size={17} color="black" style={{ padding: 10 }} />
         </View>
@@ -67,7 +72,7 @@ const Register: React.FC = () => {
         <View style={styles.vInput}>
           <TextInput style={{ flex: 1 }} placeholder="Konfirmasi Password" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry={!showPassword} />
         </View>
-        <TouchableOpacity style={styles.button} onPress={() => registerControl(email, password, confirmPassword)}>
+        <TouchableOpacity style={styles.button} onPress={() => registerControl(username, email, password, confirmPassword)}>
           <Text style={styles.buttonText}>Sign Up</Text>
         </TouchableOpacity>
         <View style={styles.switchContainer}>
