@@ -3,6 +3,7 @@ import { addDoc, collection } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db } from '@/service/firebaseConfig';
 import { TugasData, SubTugas } from '@/types/typeTugas';
+import { ToastAndroid } from 'react-native';
 
 export const handleTambahSubTugas = (
     subTugas: string,
@@ -52,7 +53,8 @@ export const handleTambahTugas = async (
 
         await addDoc(collection(db, 'tdl'), newTugas);
         router.push('/(tabs)/Home');
-        Alert.alert('Sukses', 'Tugas berhasil ditambahkan!');
+        // Alert.alert('Sukses', 'Tugas berhasil ditambahkan!');
+        ToastAndroid.show('Tugas berhasil ditambahkan', ToastAndroid.SHORT);
 
         setJudulTugas('');
         setSubTugasList([]);

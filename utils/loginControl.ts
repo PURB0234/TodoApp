@@ -38,6 +38,8 @@ export const loginControl = async (email: string, password: string) => {
                 await AsyncStorage.setItem('userId', doc.id);
                 const storedUserId = await AsyncStorage.getItem('userId')
                 console.log('User ID setelah login:', storedUserId)
+                await AsyncStorage.setItem('userEmail', email);
+                // setIsLoggedIn(true);
                 router.replace('/(tabs)/Home');
                 Alert.alert('Success', 'Login berhasil!');
             } else {

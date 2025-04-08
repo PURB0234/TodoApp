@@ -47,6 +47,7 @@ const TugasComponent: React.FC<TugasProps> = ({
         fontWeight: '500',
         marginBottom: 10
       }}>
+        {/* judul tugasnya */}
         {item.judulTugas}
       </Text>
 
@@ -61,7 +62,8 @@ const TugasComponent: React.FC<TugasProps> = ({
               color: 'gray'
             }
           ]}>
-            {subTugas.text}
+            {/* data sub tugas */}
+            {subTugas.text} 
           </Text>
         )}
       />
@@ -90,9 +92,9 @@ const TugasComponent: React.FC<TugasProps> = ({
             borderBottomRightRadius: 20,
             maxHeight: '100%',
           }}>
-            <View style={{flexDirection: 'row'}}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>Tugas Prioritas</Text>
-            <Ionicons name='pin-sharp' size={25} color={'red'}/>
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={{ fontSize: 18, fontWeight: '400', marginBottom: 10 }}>Tugas Prioritas</Text>
+              <Ionicons name='pin-sharp' size={25} color={'red'} />
             </View>
             <FlatList
               data={tugas.filter((item) => item.prioritas)}
@@ -101,7 +103,7 @@ const TugasComponent: React.FC<TugasProps> = ({
             />
             <Text style={{
               fontSize: 18,
-              fontWeight: 'bold',
+              fontWeight: '400',
               marginBottom: 5,
               marginTop: 25,
             }}>Tugas Lainya</Text>
@@ -110,14 +112,14 @@ const TugasComponent: React.FC<TugasProps> = ({
       </View>
 
       <FlatList
-        data={searchText ? filterTugas : tugas}
+        data={(searchText ? filterTugas : tugas).filter((item) => !item.prioritas)}
         numColumns={2}
         renderItem={renderTugasItem}
         ListEmptyComponent={
           loading ? (
             <View style={{
               height: 700,
-              justifyContent: 'center'
+              justifyContent: 'center',
             }}>
               <Text style={styles.loadingText}>Memuat data...</Text>
             </View>
@@ -127,7 +129,7 @@ const TugasComponent: React.FC<TugasProps> = ({
               justifyContent: 'center',
               alignItems: 'center'
             }}>
-              <Image source={require('@/assets/images/no_task.png')} />
+              <Image source={require('@/assets/images/no_task_found.png')} />
             </View>
           )
         }

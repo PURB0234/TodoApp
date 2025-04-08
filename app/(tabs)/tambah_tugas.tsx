@@ -1,19 +1,13 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
-  Alert,
   FlatList,
 } from 'react-native';
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { db } from '@/service/firebaseConfig'
 import styles from '@/style/addTask_style';
 import { handleTambahTugas, handleTambahSubTugas } from '@/utils/addTask';
 

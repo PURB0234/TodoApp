@@ -5,7 +5,7 @@ import { router } from "expo-router";
 
 export const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-export const registerControl = async (username: string, email: string, password: string, confirmPassword: string) => {
+export const registerControl = async (email: string, password: string, confirmPassword: string) => {
     if (!email.trim() && !password.trim() && !confirmPassword.trim()) {
         Alert.alert('Input Error', 'Harap isi semua kolom.');
         return;
@@ -45,7 +45,7 @@ export const registerControl = async (username: string, email: string, password:
             return;
         }
 
-        await addDoc(collection(db, 'users'), {username, email, password, role: 'user', timestamp: new Date() });
+        await addDoc(collection(db, 'users'), {email, password, timestamp: new Date() });
         Alert.alert('Success', 'Registrasi berhasil! Silakan login.');
         router.push('/(tabs)/Login');
     } catch (error) {

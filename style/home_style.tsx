@@ -16,6 +16,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    height: 100
   },
   input: {
     flex: 1,
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
   },
   subTugasText: {
     fontSize: 14,
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   closeButton: {
     backgroundColor: 'skyblue',

@@ -1,6 +1,7 @@
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import { Alert } from "react-native";
+import { router } from "expo-router";
 
 export const requestNotificationPermission = async () => {
   if (!Device.isDevice) {
@@ -25,10 +26,11 @@ export const requestNotificationPermission = async () => {
 
 export const setupNotificationListener = () => {
   Notifications.addNotificationReceivedListener((notification) => {
-    console.log('Notifikasi diterima:', notification);
+    console.log('Notifikasi diterima👍👍');
   });
 
   Notifications.addNotificationResponseReceivedListener((response) => {
     console.log('User menekan notifikasi:', response);
+    router.push('/(tabs)/Home');
   });
 }

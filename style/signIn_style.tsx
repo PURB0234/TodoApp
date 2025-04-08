@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, 
     borderColor: '#ccc', 
     borderRadius: 5, 
-    marginBottom: 10 
+    marginBottom: 10, 
   },
   button: { 
     backgroundColor: 'skyblue', 
@@ -47,6 +47,23 @@ const styles = StyleSheet.create({
     color: 'blue', 
     marginLeft: 5 
   },
+  google: {
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  facebook: {
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 15
+  }
 });
 
 export default styles;

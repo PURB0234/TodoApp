@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,11 +9,10 @@ import {
   ScrollView,
   Alert,
   Platform,
-  Image,
   StatusBar,
+  ToastAndroid,
 } from 'react-native';
 import {
-  getFirestore,
   collection,
   getDocs,
   query,
@@ -21,11 +20,7 @@ import {
   deleteDoc,
   doc,
   updateDoc,
-  addDoc,
   getDoc,
-  setDoc,
-  FieldValue,
-  deleteField,
 } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -38,7 +33,8 @@ import { handleHapusDeadline, handleSimpanDeadline } from '@/utils/deadlineCront
 import { requestNotificationPermission, setupNotificationListener } from '@/utils/notifikasi';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
+import { useFocusEffect } from '@react-navigation/native';
+import { Appbar } from "react-native-paper"
 
 type Tugas = {
   [x: string]: unknown;
@@ -69,21 +65,38 @@ const Home: React.FC = () => {
   const [isCheckingLogin, setIsCheckingLogin] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [filterTugas, setFilterTugas] = useState<Tugas[]>([]);
-  const [totalSelesai, setTotalSelesai] = useState(0);
   const [tanggal, setTanggal] = useState(new Date());
   const [waktu, setWaktu] = useState(new Date());
-  const [tampil, setTampil] = useState(false);
   const [newSubTugasList, setNewSubTugasList] = useState<{
     statusSelesai: any; text: string
   }[]>([]);
-  const [isTerlambat, setIsTerlambat] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [selectedDeadline, setSelectedDeadline] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     requestNotificationPermission();
     setupNotificationListener();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const getEmail = async () => {
+        const email = await AsyncStorage.getItem("userEmail");
+        setUserEmail(email);
+      };
+      getEmail();
+    }, [])
+  );
+
+  useEffect(() => {
+    if (!modalVisible) {
+      console.log('Reset sub-tugas setelah modal di close');
+      setNewSubTugasList([]);
+      setSelectedEdit(null);
+      setSubTugas('');
+    }
+  }, [modalVisible]);
 
   interface TugasData {
     subTugas: SubTugas[];
@@ -184,17 +197,18 @@ const Home: React.FC = () => {
       await deleteDoc(tugasDocRef);
       setModalVisible(false);
       setTugas((prevTugas) => prevTugas.filter((tugas) => tugas.id !== id));
+      ToastAndroid.show('Tugas berhasil dihapus.', ToastAndroid.SHORT);
     } catch (error) {
       console.error('Error deleting tugas:', error);
       alert('Gagal menghapus tugas!');
     }
   };
 
-  const toggleComplete = (index: number): void => {
-    const updatedList = [...subTugasList];
-    updatedList[index].statusSelesai = !updatedList[index].statusSelesai;
-    setSubTugasList(updatedList);
-  }
+  // const toggleComplete = (index: number): void => {
+  //   const updatedList = [...subTugasList];
+  //   updatedList[index].statusSelesai = !updatedList[index].statusSelesai;
+  //   setSubTugasList(updatedList);
+  // }
 
   const handleOpenModal = (item: Tugas) => {
     setSelectedTugas(item);
@@ -214,6 +228,9 @@ const Home: React.FC = () => {
   const handleCloseEditTugas = () => {
     setModalVisible(false);
     setSelectedEdit(null);
+
+    setNewSubTugasList([]);
+    setSubTugas('');
   }
 
   const handleOpenDeadline = () => {
@@ -293,9 +310,12 @@ const Home: React.FC = () => {
           onPress: async () => {
             try {
               await AsyncStorage.removeItem('userId');
+              await AsyncStorage.removeItem('userEmail');
+              setUserEmail(null);
               setIsLoggedIn(false);
               setSelectedSwitch(false);
-              Alert.alert('Berhasil', 'Anda berhasil keluar!')
+              // Alert.alert('Berhasil', 'Anda berhasil keluar!');
+              ToastAndroid.show('Anda telah keluar.', ToastAndroid.SHORT);
               setTimeout(() => {
                 router.replace('/(tabs)/Login')
               }, 500);
@@ -369,11 +389,17 @@ const Home: React.FC = () => {
 
   const handleChangeTanggal = () => {
     if (!selectedTugas) return;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0)
     DateTimePickerAndroid.open({
-      value: tanggal,
+      value: tanggal || now,
       onChange: (event, selectedDate) => {
-        if (selectedDate) {
+        if (!selectedDate) return;
+        selectedDate.setHours(0, 0, 0, 0);
+        if (selectedDate >= now) {
           setTanggal(selectedDate);
+        } else {
+          Alert.alert('Error', 'Silahkan atur dari tanggal sekarang dan seterusnya')
         }
       },
       mode: 'date',
@@ -400,6 +426,7 @@ const Home: React.FC = () => {
     const index = updatedTugas.findIndex((t) => t.id === item.id);
     if (index !== -1) {
       updatedTugas[index].prioritas = !updatedTugas[index].prioritas;
+
       setSelectedTugas(updatedTugas[index]);
     }
     setTugas(updatedTugas);
@@ -435,58 +462,55 @@ const Home: React.FC = () => {
   //UI/Tampilan
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle={'dark-content'}/>
+      <StatusBar barStyle={'dark-content'} />
+      <Appbar style={{ backgroundColor: '#f8f9fa', height: 95 }}>
+        {/* <Appbar.Content title="My Todo" /> */}
+        <TouchableOpacity style={styles.buttonSwitch} onPress={handleOpenSwitchAkun}>
+          <Ionicons name='person-circle' size={30} color={'black'} />
+        </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Telusuri Catatan Anda"
+          value={searchText}
+          onChangeText={setSearchText}
+        />
+        <TouchableOpacity style={styles.searchButton} onPress={() => handleSearch(searchText)}>
+          <Ionicons name='search' size={20} color={'#00000'} />
+        </TouchableOpacity>
+      </Appbar>
       <View style={styles.container}>
-        <View style={styles.searchContainer}>
-          <TouchableOpacity style={styles.buttonSwitch} onPress={handleOpenSwitchAkun}>
-            <Ionicons name='person-circle' size={30} color={'black'} />
-          </TouchableOpacity>
-          {selectedSwitch && (
-            <Modal
-              animationType='fade'
-              visible={profil}
-              transparent={true}
-              onRequestClose={handleCloseSwitchAkun}
-            >
-              <View style={styles.v1}>
-                <View style={styles.v2}>
-                  <View style={styles.v3}>
-                    <View style={styles.v4}>
-                      <Ionicons name='person-circle' size={42} color={'#00000'} />
-                      <View style={styles.v5}>
-                        <Text style={{
-                          fontSize: 15,
-                          fontWeight: 'bold'
-                        }}>Username</Text>
-                        <Text>aku10@gmail.com</Text>
-                      </View>
-                      <View style={{
-                        alignItems: 'flex-end',
-                        width: '50%',
-                      }}>
-                        <TouchableOpacity style={styles.buttonLogout} onPress={Logout}>
-                          <Ionicons name='log-out-outline' size={25} color={'#00000'} />
-                        </TouchableOpacity>
-                      </View>
+        {selectedSwitch && (
+          <Modal
+            animationType='fade'
+            visible={profil}
+            transparent={true}
+            onRequestClose={handleCloseSwitchAkun}
+          >
+            <View style={styles.v1}>
+              <View style={styles.v2}>
+                <View style={styles.v3}>
+                  <View style={styles.v4}>
+                    <Ionicons name='person-circle' size={42} color={'#00000'} />
+                    <View style={styles.v5}>
+                      <Text style={{ top: 10 }}>{userEmail ? userEmail : 'Tidak ada email'}</Text>
                     </View>
-                    <View style={styles.v6}>
+                    <View style={{
+                      alignItems: 'flex-start',
+                      position: 'absolute',
+                      right: 1,
+                    }}>
+                      <TouchableOpacity style={styles.buttonLogout} onPress={Logout}>
+                        <Ionicons name='log-out-outline' size={25} color={'#00000'} />
+                      </TouchableOpacity>
                     </View>
+                  </View>
+                  <View style={styles.v6}>
                   </View>
                 </View>
               </View>
-            </Modal>
-          )}
-
-          <TextInput
-            style={styles.input}
-            placeholder="Telusuri Catatan Anda"
-            value={searchText}
-            onChangeText={setSearchText}
-          />
-          <TouchableOpacity style={styles.searchButton} onPress={() => handleSearch(searchText)}>
-            <Ionicons name='search' size={20} color={'#00000'} />
-          </TouchableOpacity>
-        </View>
+            </View>
+          </Modal>
+        )}
 
         {selectedTugas && (
           <Modal
@@ -504,7 +528,7 @@ const Home: React.FC = () => {
                 }}>
                   <Text style={styles.modalTitle}>{selectedTugas.judulTugas}  </Text>
 
-                  {/* modal deadline */}
+                  {/* modal pengingat */}
                   {isVisible && (
                     <Modal
                       animationType='slide'
@@ -593,7 +617,7 @@ const Home: React.FC = () => {
                                 <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', padding: 5 }}
                                   onPress={() => handleHapusDeadline(selectedTugas, (tugas) => setSelectedTugas(null), setIsVisible)}
                                 >
-                                  <Text style={{ color: 'rgb(31, 142, 211)' }}>Hapus Deadline</Text>
+                                  <Text style={{ color: 'rgb(31, 142, 211)' }}>Hapus</Text>
                                 </TouchableOpacity>
                               </View>
                             </View>
@@ -629,35 +653,32 @@ const Home: React.FC = () => {
                   {/* <Text style={styles.modalSubTitle}>Sub-Tugas:</Text> */}
 
                   {selectedTugas.subTugas && selectedTugas.subTugas.length > 0 ? (
-                    selectedTugas.subTugas
-                      .filter((sub) => !sub.completed)
-                      .map((sub, index) => (
-
-                        <TouchableOpacity
-                          key={index}
-                          style={styles.subTugasItem}
-                          onPress={() =>
-                            handleToggleSubTask(sub, index)
-                          }
+                    selectedTugas.subTugas.filter((sub) => !sub.completed).map((sub, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.subTugasItem}
+                        onPress={() =>
+                          handleToggleSubTask(sub, index)
+                        }
+                      >
+                        <Ionicons
+                          name={sub.completed ? 'checkbox' : 'square-outline'}
+                          size={24}
+                          color={sub.completed ? 'gray' : 'black'}
+                          style={{
+                            marginRight: 10,
+                          }}
+                        />
+                        <Text
+                          style={[
+                            styles.subTugasText,
+                            sub.completed && { textDecorationLine: 'line-through', color: 'gray' },
+                          ]}
                         >
-                          <Ionicons
-                            name={sub.completed ? 'checkbox' : 'square-outline'}
-                            size={24}
-                            color={sub.completed ? 'gray' : 'black'}
-                            style={{
-                              marginRight: 10,
-                            }}
-                          />
-                          <Text
-                            style={[
-                              styles.subTugasText,
-                              sub.completed && { textDecorationLine: 'line-through', color: 'gray' },
-                            ]}
-                          >
-                            {sub.text || sub}
-                          </Text>
-                        </TouchableOpacity>
-                      ))
+                          {sub.text || sub}
+                        </Text>
+                      </TouchableOpacity>
+                    ))
                   ) : (
                     <Text style={styles.noResultText}>Tidak ada sub-tugas ditemukan.</Text>
                   )}
@@ -685,24 +706,22 @@ const Home: React.FC = () => {
                 </View>
                 {aktif && (
                   <View>
-                    {selectedTugas.subTugas
-                      .filter((sub) => sub.completed)
-                      .map((sub, index) => (
-                        <TouchableOpacity
-                          key={index}
-                          style={styles.subTugasItem}
+                    {selectedTugas.subTugas.filter((sub) => sub.completed).map((sub, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.subTugasItem}
                         // onPress={() => handleToggleSubTask(sub, index)}
-                        >
-                          <Ionicons name='checkbox'
-                            size={24}
-                            color={'gray'}
-                            style={{
-                              marginRight: 10, marginStart: 37.7
-                            }} />
-                          <Text style={[styles.subTugasText, { textDecorationLine: 'line-through', color: 'gray' }]}>
-                            {sub.text}</Text>
-                        </TouchableOpacity>
-                      ))}
+                      >
+                        <Ionicons name='checkbox'
+                          size={24}
+                          color={'gray'}
+                          style={{
+                            marginRight: 10, marginStart: 37.7
+                          }} />
+                        <Text style={[styles.subTugasText, { textDecorationLine: 'line-through', color: 'gray' }]}>
+                          {sub.text}</Text>
+                      </TouchableOpacity>
+                    ))}
                   </View>
                 )}
                 <TouchableOpacity
@@ -766,7 +785,7 @@ const Home: React.FC = () => {
                 onPress={handleCloseEditTugas} >
                 <Ionicons name='arrow-back' size={23} color={'#00000'} />
               </TouchableOpacity>
-              <Text style={{fontSize: 20, marginStart: 30}}>Edit Tugas</Text>
+              <Text style={{ fontSize: 20, marginStart: 30 }}>Edit Tugas</Text>
             </View>
             <View>
               <TextInput
@@ -849,23 +868,12 @@ const Home: React.FC = () => {
               keyExtractor={(_, index) => index.toString()}
               renderItem={({ item, index }) => (
                 <View style={styles.subTugasList}>
-                  {/* <TouchableOpacity
-                    onPress={() => toggleComplete(index)}
-                    style={{
-                      marginStart: 15
-                    }} >
-                    <Ionicons name={item.statusSelesai ? 'checkbox' : 'square-outline'}
-                      size={24}
-                      color={item.statusSelesai ? 'gray' : 'gray'}
-                    />
-                  </TouchableOpacity> */}
                   <Text style={[
                     styles.subTeskText,
                     item.statusSelesai && { textDecorationLine: 'line-through' },
                   ]}>
                     {item.text}
                   </Text>
-
                   <TouchableOpacity style={{
                     marginEnd: 10,
                   }} onPress={() => handleHapusSubTugas(index)}>
@@ -882,4 +890,3 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-
